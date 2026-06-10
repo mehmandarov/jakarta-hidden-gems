@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>com.mehmandarov.jhg</groupId>
+        <artifactId>jakarta-hidden-gems-parent</artifactId>
+        <version>0.1.0-SNAPSHOT</version>
+    </parent>
+
+    <artifactId>authorization</artifactId>
+    <packaging>jar</packaging>
+    <name>ConfSpeakerHub — Gem 2: Portable Authorization (@RolesAllowed + ABAC)</name>
+    <description>
+        Portable, in-process authorization for ConfSpeakerHub: @RolesAllowed
+        (Jakarta Annotations) plus a JAX-RS filter and a hot-reloadable JSON
+        policy with a sandboxed predicate DSL (gem #3 swaps the DSL for Jakarta
+        EL). Plain CDI + JAX-RS, so it runs on Open Liberty, Helidon and
+        Quarkus. Jakarta Authorization (JACC) 3.0 is the full-profile escalation,
+        covered as a bonus.
+    </description>
+
+    <dependencies>
+        <dependency>
+            <groupId>jakarta.platform</groupId>
+            <artifactId>jakarta.jakartaee-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.mehmandarov.jhg</groupId>
+            <artifactId>domain</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.mehmandarov.jhg</groupId>
+            <artifactId>interceptors-observability</artifactId>
+        </dependency>
+
+        <!-- Test-time JSON-P (provided by Liberty at runtime). -->
+        <dependency>
+            <groupId>org.eclipse.parsson</groupId>
+            <artifactId>parsson</artifactId>
+            <version>1.1.7</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.assertj</groupId>
+            <artifactId>assertj-core</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <resources>
+            <resource>
+                <directory>${project.basedir}/src/main/resources</directory>
+            </resource>
+            <!-- Seed both the speaker registry and the default policy file
+                 from the shared /feeds and /policy directories at the repo root. -->
+            <resource>
+                <directory>${project.basedir}/../feeds</directory>
+                <includes>
+                    <include>speakers.json</include>
+                </includes>
+            </resource>
+            <resource>
+                <directory>${project.basedir}/../policy</directory>
+                <targetPath>policy</targetPath>
+                <includes>
+                    <include>rules.json</include>
+                </includes>
+            </resource>
+        </resources>
+    </build>
+</project>
+

@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>com.mehmandarov.jhg</groupId>
+        <artifactId>jakarta-hidden-gems-parent</artifactId>
+        <version>0.1.0-SNAPSHOT</version>
+        <relativePath>../../../pom.xml</relativePath>
+    </parent>
+
+    <artifactId>runner-liberty</artifactId>
+    <packaging>war</packaging>
+    <name>ConfSpeakerHub — Liberty runner (runnable fat-jar)</name>
+    <description>
+        Open Liberty runner. Assembles a transient WAR from the capstone library
+        and bakes it into a self-contained runnable fat-jar (Liberty kernel +
+        features from server.xml + the app). The WAR is an internal build
+        artifact only; the deliverable is target/confspeakerhub.jar.
+    </description>
+
+    <properties>
+        <liberty.var.http.port>9080</liberty.var.http.port>
+        <liberty.var.https.port>9443</liberty.var.https.port>
+        <liberty.var.app.context.root>/</liberty.var.app.context.root>
+    </properties>
+
+    <dependencies>
+        <!-- The runtime-neutral application; overlaid into the transient WAR. -->
+        <dependency>
+            <groupId>com.mehmandarov.jhg</groupId>
+            <artifactId>capstone</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <!-- Integration smoke test (Testcontainers): boots the built image and
+             exercises /health + the gem #5 SSE analyze stream. -->
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.assertj</groupId>
+            <artifactId>assertj-core</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>testcontainers</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>testcontainers-junit-jupiter</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.parsson</groupId>
+            <artifactId>parsson</artifactId>
+            <version>1.1.7</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-simple</artifactId>
+            <version>2.0.16</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <!-- server.xml references location="capstone.war", so keep that name. -->
+        <finalName>capstone</finalName>
+        <plugins>
+            <!-- Integration tests (suffix *IT) run on `mvn verify`; they build
+                 the capstone Docker image via Testcontainers. Skipped when
+                 Docker is unavailable; -DskipITs to skip explicitly. -->
+            <plugin>
+                <artifactId>maven-failsafe-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>integration-test</goal>
+                            <goal>verify</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>io.openliberty.tools</groupId>
+                <artifactId>liberty-maven-plugin</artifactId>
+                <!--
+                  Bound to `package` so
+                      mvn -pl 06-capstone/runners/runner-liberty -am package
+                  produces a self-contained runnable fat-jar at
+                      runners/runner-liberty/target/confspeakerhub.jar
+                  (Liberty kernel + features from server.xml + the app WAR baked
+                  in). The Dockerfile copies that jar into a slim JRE base.
+
+                  Other goals on demand:
+                      mvn -pl 06-capstone/runners/runner-liberty liberty:dev
+                      mvn -pl 06-capstone/runners/runner-liberty liberty:run
+                -->
+                <configuration>
+                    <serverName>defaultServer</serverName>
+                    <include>runnable</include>
+                    <packageName>confspeakerhub</packageName>
+                    <!--
+                      Resolve the Liberty kernel (and, via install-feature, the
+                      features) from Maven Central instead of IBM's download host
+                      (public.dhe.ibm.com). Keeps the build reproducible from a
+                      single repository and avoids any dependency on IBM-host DNS.
+                    -->
+                    <runtimeArtifact>
+                        <groupId>io.openliberty</groupId>
+                        <artifactId>openliberty-kernel</artifactId>
+                        <version>26.0.0.5</version>
+                        <type>zip</type>
+                    </runtimeArtifact>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>package-runnable-jar</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>create</goal>
+                            <goal>install-feature</goal>
+                            <goal>deploy</goal>
+                            <goal>package</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+</project>

@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>com.mehmandarov.jhg</groupId>
+        <artifactId>jakarta-hidden-gems-parent</artifactId>
+        <version>0.1.0-SNAPSHOT</version>
+        <relativePath>../../../pom.xml</relativePath>
+    </parent>
+
+    <artifactId>runner-quarkus</artifactId>
+    <packaging>jar</packaging>
+    <name>ConfSpeakerHub — Quarkus runner (runnable fat-jar)</name>
+    <description>
+        Quarkus runner. Quarkus does not deploy WARs — it augments the
+        application at build time. With quarkus.package.jar.type=uber-jar the
+        build produces a single runnable fat-jar
+        (target/runner-quarkus-runner.jar): java -jar runner-quarkus-runner.jar.
+    </description>
+
+    <properties>
+        <quarkus.platform.version>3.36.1</quarkus.platform.version>
+        <quarkus.package.jar.type>uber-jar</quarkus.package.jar.type>
+    </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>io.quarkus.platform</groupId>
+                <artifactId>quarkus-bom</artifactId>
+                <version>${quarkus.platform.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+    <dependencies>
+        <!-- The runtime-neutral application. -->
+        <dependency>
+            <groupId>com.mehmandarov.jhg</groupId>
+            <artifactId>capstone</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <!-- Quarkus extensions: CDI (Arc), JAX-RS (RESTEasy Reactive) incl. SSE,
+             JSON-B/JSON-P, and MicroProfile JWT. -->
+        <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-arc</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-rest</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-rest-jsonb</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-smallrye-jwt</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-smallrye-jwt-build</artifactId>
+        </dependency>
+
+        <!-- Jakarta Concurrency API (gem #4 @Asynchronous). Quarkus has no
+             Concurrency container; the API jar lets the classes load and the
+             annotation is a no-op (the methods already run inline today). -->
+        <dependency>
+            <groupId>jakarta.enterprise.concurrent</groupId>
+            <artifactId>jakarta.enterprise.concurrent-api</artifactId>
+            <version>3.1.1</version>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <finalName>runner-quarkus</finalName>
+        <plugins>
+            <plugin>
+                <groupId>io.quarkus</groupId>
+                <artifactId>quarkus-maven-plugin</artifactId>
+                <version>${quarkus.platform.version}</version>
+                <extensions>true</extensions>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>build</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+</project>

@@ -1,0 +1,117 @@
+# ConfSpeakerHub — full demo stack
+#
+# Explicitly NOT here (by design):
+#   - Keycloak  → Jakarta Security in-memory IdentityStore is enough (gem #2)
+#   - Postgres  → embedded H2 covers JTA in gem #3
+#   - RabbitMQ  → Redpanda (Kafka) is the only bus
+
+name: confspeakerhub
+
+services:
+
+  # Default runtime is Open Liberty. Each runtime has its own Dockerfile under
+  # 06-capstone/runners/runner-<runtime>/Dockerfile — swap the `dockerfile:` line
+  # below (or `docker build -f …`) to run the same app on Helidon MP or Quarkus:
+  #   06-capstone/runners/runner-liberty/Dockerfile   (default)
+  #   06-capstone/runners/runner-helidon/Dockerfile
+  #   06-capstone/runners/runner-quarkus/Dockerfile
+  app:
+    build:
+      context: .
+      dockerfile: 06-capstone/runners/runner-liberty/Dockerfile
+    image: confspeakerhub/capstone:dev
+    container_name: csh-app
+    ports:
+      - "9080:9080"
+      - "9443:9443"
+    environment:
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4317
+      OTEL_SERVICE_NAME: confspeakerhub
+      OLLAMA_BASE_URL: http://ollama:11434
+      OLLAMA_MODEL: qwen2.5:7b
+      KAFKA_BOOTSTRAP_SERVERS: redpanda:9092
+      JHG_POLICY_FILE: /etc/jhg/policy/rules.json
+    volumes:
+      # Mount the host's policy file into the container so editing it on the
+      # host triggers the in-container WatchService → live policy reload demo.
+      - ./policy:/etc/jhg/policy:ro
+    depends_on:
+      redpanda:
+        condition: service_healthy
+      ollama:
+        condition: service_started
+      otel-collector:
+        condition: service_started
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:9080/api/health"]
+      interval: 10s
+      timeout: 3s
+      retries: 6
+      start_period: 30s
+
+  ollama:
+    image: ollama/ollama:latest
+    container_name: csh-ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama-data:/root/.ollama
+    # On first run pull the primary + fallback models. Subsequent runs are no-ops.
+    # The model name is also wired to the `app` service via OLLAMA_MODEL.
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        /bin/ollama serve &
+        sleep 3
+        /bin/ollama pull qwen2.5:7b
+        /bin/ollama pull llama3.2:3b
+        wait
+
+  redpanda:
+    image: redpandadata/redpanda:latest
+    container_name: csh-redpanda
+    command:
+      - redpanda
+      - start
+      - --overprovisioned
+      - --smp=1
+      - --memory=1G
+      - --reserve-memory=0M
+      - --node-id=0
+      - --check=false
+      - --kafka-addr=PLAINTEXT://0.0.0.0:9092
+      - --advertise-kafka-addr=PLAINTEXT://redpanda:9092
+    ports:
+      - "9092:9092"
+      - "9644:9644"
+    healthcheck:
+      test: ["CMD-SHELL", "rpk cluster health | grep -q 'Healthy:.*true'"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 20s
+
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:latest
+    container_name: csh-otel
+    command: ["--config=/etc/otel-collector-config.yaml"]
+    volumes:
+      - ./infra/otel/collector-config.yaml:/etc/otel-collector-config.yaml:ro
+    ports:
+      - "4317:4317"   # OTLP gRPC
+      - "4318:4318"   # OTLP HTTP
+    depends_on:
+      - jaeger
+
+  jaeger:
+    image: jaegertracing/all-in-one:latest
+    container_name: csh-jaeger
+    environment:
+      COLLECTOR_OTLP_ENABLED: "true"
+    ports:
+      - "16686:16686"   # Jaeger UI
+      - "14250:14250"   # gRPC
+
+volumes:
+  ollama-data:
+

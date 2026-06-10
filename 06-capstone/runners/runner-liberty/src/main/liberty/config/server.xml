@@ -1,0 +1,57 @@
+<server description="ConfSpeakerHub — Phase 1 (gems #1-5)">
+
+    <!-- Jakarta EE 11 feature set + MicroProfile 7.1 for the five portable gems.
+           gem #1 Interceptors  → cdi-4.1
+           gem #2 Authorization → appSecurity-6.0 + mpJwt (via microProfile-7.1)
+           gem #3 EL            → Expressly RI bundled in the WAR
+           gem #4 SSE           → restfulWS-4.0 already enables SSE
+           gem #5 JSON-P        → jsonp-2.1
+         Runs on Open Liberty BETA, which is the first stream to ship a mpJwt
+         level (2.x in MP 7.1) that is compatible with cdi-4.1 / servlet-6.1.
+         The microProfile-7.1 umbrella also provides mpConfig, mpHealth,
+         mpTelemetry, mpRestClient, mpFaultTolerance, mpOpenAPI, mpMetrics —
+         so we don't list them individually.
+         Messaging (JCA / Reactive Messaging) lives in the bonus modules. -->
+    <featureManager>
+        <feature>cdi-4.1</feature>
+        <feature>restfulWS-4.0</feature>
+        <feature>jsonp-2.1</feature>
+        <feature>jsonb-3.0</feature>
+        <feature>servlet-6.1</feature>
+        <!-- Gem #4 + #5: Jakarta Concurrency 3.1 @Asynchronous
+             (jakarta.enterprise.concurrent.Asynchronous, Web Profile — not
+             jakarta.ejb.Asynchronous). Caveat: both async methods are called
+             via self-invocation, which bypasses the CDI proxy, so they run
+             inline today. Off-thread dispatch is a tracked follow-up.
+             See docs/ARCHITECTURE.md §4. -->
+        <feature>concurrent-3.1</feature>
+        <!-- Gem #2: portable authentication via MicroProfile JWT.
+             appSecurity-6.0 enforces @RolesAllowed; mpJwt (from microProfile-7.1)
+             validates the Bearer token's groups claim. -->
+        <feature>appSecurity-6.0</feature>
+        <feature>microProfile-7.1</feature>
+    </featureManager>
+
+    <httpEndpoint id="defaultHttpEndpoint"
+                  host="*"
+                  httpPort="${http.port}"
+                  httpsPort="${https.port}" />
+
+    <!-- Dev-only LTPA / keystore passwords so the runnable jar boots without
+         CWWKS4118E. In production both come from environment variables or a
+         secrets mount; the keys themselves are auto-generated on first start. -->
+    <ltpa keysPassword="confspeakerhub-dev-ltpa"/>
+    <keyStore id="defaultKeyStore" password="confspeakerhub-dev-ks"/>
+
+    <webApplication id="capstone"
+                    location="capstone.war"
+                    contextRoot="${app.context.root}" />
+
+    <!-- Authentication is MicroProfile JWT: @LoginConfig(authMethod="MP-JWT")
+         on the JAX-RS Application, with mpJwt-2.1 validating the Bearer token's
+         groups claim. Portable across Liberty / Helidon / Quarkus. -->
+    <applicationManager autoExpand="true" />
+
+
+</server>
+

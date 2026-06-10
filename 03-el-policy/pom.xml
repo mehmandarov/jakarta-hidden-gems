@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>com.mehmandarov.jhg</groupId>
+        <artifactId>jakarta-hidden-gems-parent</artifactId>
+        <version>0.1.0-SNAPSHOT</version>
+    </parent>
+
+    <artifactId>el-policy</artifactId>
+    <packaging>jar</packaging>
+    <name>ConfSpeakerHub — Gem 3: Jakarta Expression Language (EL)</name>
+    <description>
+        Promotes gem #2's hand-rolled predicate DSL to sandboxed Jakarta EL.
+        A globally-enabled CDI @Alternative bean swaps the PredicateEngine for an
+        ELProcessor-based one, so the same hot-reloadable rules.json keeps working — and policy
+        authors gain date arithmetic, member access and functions. The Jakarta EL
+        RI (Expressly) is bundled, so it runs on Open Liberty, Helidon and
+        Quarkus with no container EL dependency.
+    </description>
+
+    <dependencies>
+        <dependency>
+            <groupId>jakarta.platform</groupId>
+            <artifactId>jakarta.jakartaee-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.mehmandarov.jhg</groupId>
+            <artifactId>domain</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.mehmandarov.jhg</groupId>
+            <artifactId>authorization</artifactId>
+        </dependency>
+
+        <!-- Jakarta EL 6 reference implementation, bundled so the gem is
+             runtime-independent (no reliance on a container-provided EL). -->
+        <dependency>
+            <groupId>org.glassfish.expressly</groupId>
+            <artifactId>expressly</artifactId>
+            <version>${expressly.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.assertj</groupId>
+            <artifactId>assertj-core</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+</project>
+

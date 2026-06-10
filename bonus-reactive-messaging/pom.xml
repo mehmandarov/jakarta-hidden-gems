@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>com.mehmandarov.jhg</groupId>
+        <artifactId>jakarta-hidden-gems-parent</artifactId>
+        <version>0.1.0-SNAPSHOT</version>
+    </parent>
+
+    <artifactId>reactive-messaging</artifactId>
+    <packaging>jar</packaging>
+    <name>ConfSpeakerHub — Bonus: MicroProfile Reactive Messaging (Kafka)</name>
+    <description>
+        Portable Kafka/Redpanda messaging via MicroProfile Reactive Messaging
+        (@Incoming / @Outgoing / Emitter). Runs on Open Liberty, Helidon
+        and Quarkus — the portable alternative to the full-profile Jakarta
+        Connectors (JCA) module. Verified end-to-end against a real Redpanda
+        broker via Testcontainers.
+    </description>
+
+    <properties>
+        <microprofile.reactive.messaging.version>3.0.1</microprofile.reactive.messaging.version>
+        <kafka.clients.version>4.3.0</kafka.clients.version>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>jakarta.platform</groupId>
+            <artifactId>jakarta.jakartaee-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.mehmandarov.jhg</groupId>
+            <artifactId>domain</artifactId>
+        </dependency>
+
+        <!-- MicroProfile Reactive Messaging API (provided by the runtime:
+             Liberty mpReactiveMessaging, Helidon, Quarkus). -->
+        <dependency>
+            <groupId>org.eclipse.microprofile.reactive.messaging</groupId>
+            <artifactId>microprofile-reactive-messaging-api</artifactId>
+            <version>${microprofile.reactive.messaging.version}</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <!-- Test: verify a real Kafka round-trip against Redpanda. -->
+        <dependency>
+            <groupId>org.apache.kafka</groupId>
+            <artifactId>kafka-clients</artifactId>
+            <version>${kafka.clients.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <!-- JSON-B impl for the consumer unit test (Liberty provides it at runtime). -->
+        <dependency>
+            <groupId>org.eclipse</groupId>
+            <artifactId>yasson</artifactId>
+            <version>3.0.4</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>testcontainers-redpanda</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>testcontainers-junit-jupiter</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.assertj</groupId>
+            <artifactId>assertj-core</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-simple</artifactId>
+            <version>2.0.16</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <!-- The *IT test spins up a real Redpanda via Testcontainers and
+                 verifies the Kafka round-trip on `mvn verify`. It skips
+                 automatically when Docker isn't available. -->
+            <plugin>
+                <artifactId>maven-failsafe-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>integration-test</goal>
+                            <goal>verify</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+</project>
+

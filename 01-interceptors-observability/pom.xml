@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>com.mehmandarov.jhg</groupId>
+        <artifactId>jakarta-hidden-gems-parent</artifactId>
+        <version>0.1.0-SNAPSHOT</version>
+    </parent>
+
+    <artifactId>interceptors-observability</artifactId>
+    <packaging>jar</packaging>
+    <name>ConfSpeakerHub — Gem 1: Interceptors / Observability</name>
+    <description>
+        Jakarta Interceptors-based observability gem: @Traced and @Timed
+        interceptor bindings, a CDI producer for the OpenTelemetry SDK
+        (autoconfigured from env), and the first ConfSpeakerHub HTTP surface
+        — GET /api/events backed by an in-memory store seeded from feeds.json.
+    </description>
+
+    <properties>
+        <opentelemetry.version>1.63.0</opentelemetry.version>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>jakarta.platform</groupId>
+            <artifactId>jakarta.jakartaee-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.mehmandarov.jhg</groupId>
+            <artifactId>domain</artifactId>
+        </dependency>
+
+        <!-- OpenTelemetry SDK + autoconfigure + OTLP exporter. Picks up
+             OTEL_EXPORTER_OTLP_ENDPOINT, OTEL_SERVICE_NAME, etc. from env. -->
+        <dependency>
+            <groupId>io.opentelemetry</groupId>
+            <artifactId>opentelemetry-api</artifactId>
+            <version>${opentelemetry.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.opentelemetry</groupId>
+            <artifactId>opentelemetry-sdk</artifactId>
+            <version>${opentelemetry.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.opentelemetry</groupId>
+            <artifactId>opentelemetry-exporter-otlp</artifactId>
+            <version>${opentelemetry.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.opentelemetry</groupId>
+            <artifactId>opentelemetry-sdk-extension-autoconfigure</artifactId>
+            <version>${opentelemetry.version}</version>
+        </dependency>
+
+        <!-- JSON-P implementation only used at TEST time; at runtime it's
+             provided by the Liberty server's jsonp-2.1 feature. -->
+        <dependency>
+            <groupId>org.eclipse.parsson</groupId>
+            <artifactId>parsson</artifactId>
+            <version>1.1.7</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.assertj</groupId>
+            <artifactId>assertj-core</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <resources>
+            <resource>
+                <directory>${project.basedir}/src/main/resources</directory>
+            </resource>
+            <!-- Pull the seed feed from the repo-root /feeds directory into
+                 the JAR classpath so the in-memory store can load it. -->
+            <resource>
+                <directory>${project.basedir}/../feeds</directory>
+                <includes>
+                    <include>feeds.json</include>
+                </includes>
+            </resource>
+        </resources>
+    </build>
+</project>
+

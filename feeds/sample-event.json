@@ -1,0 +1,23 @@
+{
+  "id": "sessionize:demo-conf-2027",
+  "name": "Demo Conf 2027",
+  "location": "Oslo, Norway",
+  "eventDate": "2027-05-15",
+  "cfpDeadline": "2026-12-01",
+  "tracks": [
+    "java",
+    "cloud-native",
+    "ai"
+  ],
+  "languages": [
+    "en"
+  ],
+  "websiteUrl": "https://example.org/demo-conf",
+  "cfpUrl": "https://example.org/demo-conf/cfp",
+  "tags": [
+    "demo",
+    "cfp-open",
+    "hidden-gems"
+  ]
+}
+

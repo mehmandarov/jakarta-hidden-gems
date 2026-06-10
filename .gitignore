@@ -1,0 +1,62 @@
+# Build output
+target/
+build/
+out/
+*.class
+*.jar
+*.war
+*.ear
+*.nar
+
+# Maven
+.mvn/wrapper/maven-wrapper.jar
+.mvn/wrapper/maven-wrapper.properties
+
+# IDEs
+.idea/
+*.iml
+*.ipr
+*.iws
+.vscode/
+.project
+.classpath
+.settings/
+.factorypath
+nbproject/private/
+nbbuild/
+nbdist/
+.nb-gradle/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Liberty / Payara runtime
+wlp/usr/servers/*/workarea/
+wlp/usr/servers/*/logs/
+wlp/usr/servers/*/dropins/
+**/server.env
+**/bootstrap.properties.local
+
+# Logs
+*.log
+logs/
+
+# Local DB
+*.h2.db
+*.mv.db
+*.trace.db
+data/
+
+# Local secrets / env
+.env
+.env.local
+*.local.json
+
+# Ollama / LLM caches (kept out of repo)
+ollama-data/
+
+# Docker
+.docker/
+docker-compose.override.yml
+

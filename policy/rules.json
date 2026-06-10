@@ -1,0 +1,12 @@
+{
+  "_comment": "Default JACC policy for ConfSpeakerHub. Hot-reloaded from disk at runtime — point JHG_POLICY_FILE at a writable copy of this file and edit it during the demo to watch the row set change with no redeploy. Predicate language: 5 ops (intersects, contains, ==, !=, &&) over speaker.* and event.* paths.",
+  "rules": [
+    {
+      "subject":   "role:SPEAKER",
+      "action":    "GET",
+      "resource":  "/api/events/*",
+      "predicate": "speaker.languages intersects event.languages && speaker.tracks intersects event.tracks"
+    }
+  ]
+}
+

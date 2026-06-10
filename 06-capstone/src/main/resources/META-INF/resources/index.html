@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <title>ConfSpeakerHub</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <style>
+        body { font-family: system-ui, -apple-system, sans-serif; max-width: 760px; margin: 4rem auto; padding: 0 1rem; color: #222; }
+        h1 { margin-bottom: 0.25rem; }
+        .sub { color: #666; margin-top: 0; }
+        code { background: #f4f4f4; padding: 0.1rem 0.35rem; border-radius: 3px; }
+        ul { line-height: 1.7; }
+        .badge { display: inline-block; background: #eef; color: #224; padding: 0.1rem 0.5rem; border-radius: 3px; font-size: 0.85rem; }
+    </style>
+</head>
+<body>
+    <h1>ConfSpeakerHub <span class="badge">phase 1 — gems #1–5</span></h1>
+    <p class="sub">Personal radar for tech conferences with grounded LLM matchmaking.</p>
+
+    <p>
+        Gem #1 (Jakarta Interceptors) traces every endpoint into Jaeger.
+        Gem #2 (Jakarta Authorization) filters the conference list per logged-in speaker
+        from a hot-reloadable JSON policy file.
+        Gem #3 (Jakarta Connectors + JPA) ingests CFP webhooks onto a JMS queue,
+        dedupes + persists them in one JTA tx, and audits speaker actions to a GitHub gist.
+        Gem #4 (Jakarta REST SSE + <code>@Asynchronous</code>) pushes new rows live
+        to every browser tab without a single line of WebSocket code.
+        Gem #5 (Jakarta JSON-P) streams a local LLM's analysis of any event
+        — TL;DR, tags, and three of <em>your own</em> talks that fit it
+        — token-by-token, through one <code>JsonParser</code>.
+    </p>
+
+    <h2>What's live right now</h2>
+    <ul>
+        <li><a href="/api/health"><code>GET /api/health</code></a> &mdash; liveness probe (public)</li>
+        <li><code>GET /api/events</code> &mdash; conference list, <em>filtered per speaker</em>, <code>@Traced @Timed</code></li>
+        <li><code>GET /api/events/{id}</code> &mdash; single event lookup</li>
+        <li><code>GET /api/events/stream</code> &mdash; <strong>SSE</strong> snapshot + live updates (gem #4)</li>
+        <li><code>GET /api/events/{id}/analyze</code> &mdash; <strong>SSE</strong> live LLM matchmaking (gem #5)</li>
+        <li><code>POST /api/ingest</code> &mdash; webhook landing site &rarr; <code>confs.events.incoming</code></li>
+        <li><code>POST /api/events/{id}/action</code> &mdash; SAVE / DISMISS / APPLY (DB write + audit publish in one JTA tx)</li>
+        <li><small>BASIC auth: <code>rustam:hiddengems</code> (Java/cloud-native/AI/devex, en/nb)
+            or <code>maria:flutter</code> (mobile/AI, en/es)</small></li>
+    </ul>
+
+    <h2>Live dashboard (gems #4 + #5)</h2>
+    <p>
+        Open this page in two or three tabs, then in another shell <code>POST</code> a
+        new event &mdash; every tab gets the row instantly via a single
+        <code>text/event-stream</code> response. Hit <em>Analyze</em> on any row
+        to stream a grounded LLM analysis (TL;DR, suggested tags, and three of
+        <em>your own</em> talks that fit) token-by-token.
+    </p>
+    <ul id="live-events" style="font-family: ui-monospace, monospace; font-size: 0.9rem;">
+        <li><em>connecting…</em></li>
+    </ul>
+    <div id="analyze-panel" style="display:none; margin-top:1rem; padding:1rem; background:#f8f8ff; border:1px solid #cce; border-radius:4px;">
+        <h3 style="margin-top:0;">Analyzing <code id="analyze-id"></code></h3>
+        <p><strong>TL;DR:</strong> <span id="analyze-tldr"><em>…</em></span></p>
+        <p><strong>Tags:</strong> <span id="analyze-tags"></span></p>
+        <p><strong>Topic suggestions (from your portfolio):</strong></p>
+        <ol id="analyze-topics"></ol>
+        <p id="analyze-warnings" style="color:#a00; font-size:0.85rem;"></p>
+    </div>
+
+    <h2>Try it</h2>
+    <pre style="background:#f4f4f4; padding:1rem; overflow:auto;">curl -u rustam:hiddengems http://localhost:9080/api/events | jq '. | length'
+
+# Ingest a new event (it lands on Kafka/JMS, the MDB dedupes + persists in one tx,
+# and gem #4 broadcasts it to every connected /api/events/stream subscriber)
+curl -u rustam:hiddengems -H 'Content-Type: application/json' \
+     -d @feeds/sample-event.json http://localhost:9080/api/ingest
+
+# Stream a grounded LLM analysis of an event (gem #5).
+# Set JHG_LLM_MODE=stub on the app to bypass Ollama on flaky Wi-Fi.
+curl -u rustam:hiddengems -N http://localhost:9080/api/events/sessionize:demo-conf-2027/analyze
+
+# Apply to it — DB row + confs.actions publish in the same JTA tx.
+curl -u rustam:hiddengems -H 'Content-Type: application/json' \
+     -d '{"kind":"APPLIED","note":"Hidden Gems talk"}' \
+     http://localhost:9080/api/events/sessionize:demo-conf-2027/action
+
+# Edit policy/rules.json on the host (mounted into the container) → no redeploy
+echo '...edit predicate, save, re-curl, see different rows.'</pre>
+
+    <script>
+        // ~50 lines of vanilla JS — gems #4 + #5 client.
+        // Browser handles SSE reconnection on its own; we just wire the DOM.
+        (function () {
+            const list  = document.getElementById('live-events');
+            const seen  = new Set();
+            let analyzeES = null;
+
+            const renderRow = (e) => {
+                if (seen.has(e.id)) return;
+                seen.add(e.id);
+                const li = document.createElement('li');
+                const date = e.eventDate ? ' · ' + e.eventDate : '';
+                const loc  = e.location  ? ' · ' + e.location  : '';
+                const btn = document.createElement('button');
+                btn.textContent = 'Analyze';
+                btn.style.marginRight = '0.5rem';
+                btn.onclick = () => analyze(e.id);
+                li.appendChild(btn);
+                li.appendChild(document.createTextNode('[' + e.id + '] ' + e.name + date + loc));
+                list.prepend(li);
+            };
+
+            const analyze = (id) => {
+                if (analyzeES) analyzeES.close();
+                const panel = document.getElementById('analyze-panel');
+                panel.style.display = 'block';
+                document.getElementById('analyze-id').textContent = id;
+                document.getElementById('analyze-tldr').innerHTML = '<em>…</em>';
+                document.getElementById('analyze-tags').textContent = '';
+                document.getElementById('analyze-topics').innerHTML = '';
+                document.getElementById('analyze-warnings').textContent = '';
+
+                analyzeES = new EventSource('/api/events/' + encodeURIComponent(id) + '/analyze',
+                                            { withCredentials: true });
+                analyzeES.addEventListener('tldr',  (m) =>
+                    document.getElementById('analyze-tldr').textContent = m.data);
+                analyzeES.addEventListener('tag',   (m) => {
+                    const span = document.getElementById('analyze-tags');
+                    span.textContent += (span.textContent ? ', ' : '') + m.data;
+                });
+                analyzeES.addEventListener('topic', (m) => {
+                    const t = JSON.parse(m.data);
+                    const li = document.createElement('li');
+                    li.innerHTML = '<strong>' + t.title + '</strong> &mdash; ' + t.whyItFits;
+                    document.getElementById('analyze-topics').appendChild(li);
+                });
+                analyzeES.addEventListener('warn',  (m) => {
+                    const w = document.getElementById('analyze-warnings');
+                    w.textContent += (w.textContent ? ' · ' : '') + m.data;
+                });
+                analyzeES.addEventListener('done', () => analyzeES.close());
+                analyzeES.onerror = () => analyzeES.close();
+            };
+
+            const es = new EventSource('/api/events/stream', { withCredentials: true });
+            es.addEventListener('snapshot', (m) => renderRow(JSON.parse(m.data)));
+            es.addEventListener('event',    (m) => {
+                const li = document.createElement('li');
+                li.style.background = '#ffffd0';
+                list.prepend(li);
+                renderRow(JSON.parse(m.data));
+            });
+            es.addEventListener('snapshot-end', () => {
+                if (list.firstElementChild && list.firstElementChild.querySelector('em')) {
+                    list.firstElementChild.remove();
+                }
+            });
+            es.onerror = () => { /* browser auto-reconnects */ };
+        })();
+    </script>
+
+    <p style="margin-top: 3rem; font-size: 0.85rem; color: #888;">
+        Built on Jakarta EE 11 &middot; Open Liberty &middot;
+        <a href="https://github.com/mehmandarov/jakarta-hidden-gems">source</a>
+    </p>
+</body>
+</html>
+

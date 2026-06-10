@@ -1,0 +1,74 @@
+{
+  "_comment": "Two seed speakers used by gem #2 (JACC) to demonstrate per-user filtering and by gem #5 (LLM) to ground recommendations in real portfolios.",
+  "speakers": [
+    {
+      "username": "rustam",
+      "languages": ["en", "nb"],
+      "regions":   ["EU", "NORDICS", "GLOBAL"],
+      "tracks":    ["java", "cloud-native", "ai", "devex"],
+      "roles":     ["SPEAKER", "ADMIN"],
+      "portfolio": [
+        {
+          "title": "Hidden Gems of Jakarta EE",
+          "abstractText": "Five overlooked Jakarta specs that already do what you reach for MicroProfile, Spring, Reactor, Langchain4j and Keycloak for. Live-coded from observability to a streaming local LLM, no non-Jakarta runtime deps.",
+          "tags": ["java", "jakarta-ee", "cloud-native", "ai", "observability", "security", "messaging", "reactive"]
+        },
+        {
+          "title": "Disposable Docker Containers in Day-to-Day Development",
+          "abstractText": "How throwaway containers replace local installs for databases, message brokers, identity providers and LLMs — and why your shell history is happier for it.",
+          "tags": ["docker", "devex", "cloud-native", "containers"]
+        },
+        {
+          "title": "Generating QR Codes with Secure Hashes Using Java",
+          "abstractText": "A small problem (verifiable QR codes) used as a vehicle to revisit cryptographic hashing, content addressing, and how 50 lines of plain Java still beat reaching for a library.",
+          "tags": ["java", "security", "crypto"]
+        },
+        {
+          "title": "Five Pillars of a Good Maven Project",
+          "abstractText": "Reproducibility, transparency, layered config, fast feedback, single-command bootstrap — what makes a Maven project a good citizen on a colleague's laptop in 2026.",
+          "tags": ["java", "maven", "devex", "build"]
+        },
+        {
+          "title": "Slack Notifications for Cloud Build",
+          "abstractText": "A practical pipeline pattern: turning CI events into actionable Slack messages without writing a webhook server, using Cloud Build, Pub/Sub and a tiny Cloud Function.",
+          "tags": ["cloud-native", "ci-cd", "devex", "gcp"]
+        },
+        {
+          "title": "What Happens to Your Code After a Commit",
+          "abstractText": "A guided tour of the journey from `git push` to production: hooks, CI, image registries, deployment, observability — with the failure modes you only learn the hard way.",
+          "tags": ["devex", "ci-cd", "observability"]
+        },
+        {
+          "title": "Reasoning and Semantic Wizardry",
+          "abstractText": "From RDF and SPARQL to embeddings and vector search: how 'semantic' has been quietly redefined twice in twenty years, and what each generation got right.",
+          "tags": ["ai", "semantic-web", "vector-search", "data"]
+        }
+      ]
+    },
+    {
+      "username": "maria",
+      "languages": ["en", "es"],
+      "regions":   ["EU", "GLOBAL"],
+      "tracks":    ["mobile", "ai"],
+      "roles":     ["SPEAKER"],
+      "portfolio": [
+        {
+          "title": "On-device LLMs for Mobile Apps",
+          "abstractText": "Running quantised language models directly on Android and iOS — what works in 2026, what still needs a backend, and the UX patterns that hide latency.",
+          "tags": ["mobile", "ai", "llm", "android", "ios"]
+        },
+        {
+          "title": "Flutter Performance Pitfalls",
+          "abstractText": "The five rebuild-storm patterns I keep finding in Flutter codebases, how to spot them with the framework's own tools, and the three-line refactors that fix them.",
+          "tags": ["mobile", "flutter", "performance"]
+        },
+        {
+          "title": "Cross-platform Without Compromise",
+          "abstractText": "A pragmatic case study migrating a 4-year-old native Android + iOS app to a shared cross-platform core — what we kept native, what we shared, and why.",
+          "tags": ["mobile", "kotlin-multiplatform", "architecture"]
+        }
+      ]
+    }
+  ]
+}
+

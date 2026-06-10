@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.mehmandarov.jhg</groupId>
+    <artifactId>jakarta-hidden-gems-parent</artifactId>
+    <version>0.1.0-SNAPSHOT</version>
+    <packaging>pom</packaging>
+
+    <name>Jakarta EE Hidden Gems — Parent</name>
+    <description>
+        Parent BOM and build configuration for the Jakarta EE Hidden Gems project
+        (talk ConfSpeakerHub demo).
+    </description>
+    <url>https://github.com/mehmandarov/jakarta-hidden-gems</url>
+    <inceptionYear>2026</inceptionYear>
+
+    <developers>
+        <developer>
+            <id>mehmandarov</id>
+            <name>Rustam Mehmandarov</name>
+            <url>https://mehmandarov.com/</url>
+        </developer>
+    </developers>
+
+    <modules>
+        <module>00-domain</module>
+        <module>01-interceptors-observability</module>
+        <module>02-authorization</module>
+        <module>03-el-policy</module>
+        <module>04-rest-sse-async</module>
+        <module>05-jsonp-llm-streaming</module>
+        <module>06-capstone</module>
+        <module>06-capstone/runners/runner-liberty</module>
+        <module>06-capstone/runners/runner-helidon</module>
+        <module>06-capstone/runners/runner-quarkus</module>
+        <module>bonus-reactive-messaging</module>
+        <!-- Optional follow-up:
+             bonus-el-sandbox
+        -->
+    </modules>
+
+    <properties>
+        <maven.compiler.release>25</maven.compiler.release>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+
+        <!-- Jakarta EE platform -->
+        <jakartaee.bom.version>11.0.0</jakartaee.bom.version>
+
+        <!-- Jakarta EL reference implementation (gem #3) -->
+        <expressly.version>6.0.0</expressly.version>
+
+        <!-- Test stack -->
+        <junit.jupiter.version>6.1.0</junit.jupiter.version>
+        <assertj.version>3.27.7</assertj.version>
+        <testcontainers.version>2.0.5</testcontainers.version>
+
+        <!-- Plugins -->
+        <maven.compiler.plugin.version>3.15.0</maven.compiler.plugin.version>
+        <maven.surefire.plugin.version>3.5.6</maven.surefire.plugin.version>
+        <maven.failsafe.plugin.version>3.5.6</maven.failsafe.plugin.version>
+        <maven.war.plugin.version>3.5.1</maven.war.plugin.version>
+        <liberty.maven.plugin.version>3.12.0</liberty.maven.plugin.version>
+    </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <!-- Jakarta EE 11 platform BOM (provided by Open Liberty at runtime) -->
+            <dependency>
+                <groupId>jakarta.platform</groupId>
+                <artifactId>jakarta.jakartaee-api</artifactId>
+                <version>${jakartaee.bom.version}</version>
+                <scope>provided</scope>
+            </dependency>
+
+            <!-- Local modules -->
+            <dependency>
+                <groupId>com.mehmandarov.jhg</groupId>
+                <artifactId>domain</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.mehmandarov.jhg</groupId>
+                <artifactId>interceptors-observability</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.mehmandarov.jhg</groupId>
+                <artifactId>authorization</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.mehmandarov.jhg</groupId>
+                <artifactId>el-policy</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.mehmandarov.jhg</groupId>
+                <artifactId>reactive-messaging</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.mehmandarov.jhg</groupId>
+                <artifactId>rest-sse-async</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.mehmandarov.jhg</groupId>
+                <artifactId>jsonp-llm-streaming</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <!-- Test -->
+            <dependency>
+                <groupId>org.junit</groupId>
+                <artifactId>junit-bom</artifactId>
+                <version>${junit.jupiter.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.assertj</groupId>
+                <artifactId>assertj-core</artifactId>
+                <version>${assertj.version}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.testcontainers</groupId>
+                <artifactId>testcontainers-bom</artifactId>
+                <version>${testcontainers.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+    <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <version>${maven.compiler.plugin.version}</version>
+                    <configuration>
+                        <release>${maven.compiler.release}</release>
+                        <parameters>true</parameters>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <artifactId>maven-surefire-plugin</artifactId>
+                    <version>${maven.surefire.plugin.version}</version>
+                </plugin>
+                <plugin>
+                    <artifactId>maven-failsafe-plugin</artifactId>
+                    <version>${maven.failsafe.plugin.version}</version>
+                </plugin>
+                <plugin>
+                    <artifactId>maven-war-plugin</artifactId>
+                    <version>${maven.war.plugin.version}</version>
+                    <configuration>
+                        <failOnMissingWebXml>false</failOnMissingWebXml>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>io.openliberty.tools</groupId>
+                    <artifactId>liberty-maven-plugin</artifactId>
+                    <version>${liberty.maven.plugin.version}</version>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+    </build>
+</project>
+

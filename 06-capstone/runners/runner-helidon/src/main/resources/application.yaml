@@ -1,0 +1,14 @@
+server:
+  port: 9080
+  host: 0.0.0.0
+  # Helidon MP does not auto-serve META-INF/resources the way the Servlet
+  # runtimes do. Register the static-content ServerFeature (provided by the
+  # helidon-webserver-static-content dependency) to serve the bundled dashboard
+  # at /, while the JAX-RS app keeps serving the API under /api.
+  features:
+    static-content:
+      welcome: "index.html"
+      classpath:
+        - context: "/"
+          location: "/META-INF/resources"
+          welcome: "index.html"
