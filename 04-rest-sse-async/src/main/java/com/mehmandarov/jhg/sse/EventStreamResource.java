@@ -3,12 +3,8 @@
  */
 package com.mehmandarov.jhg.sse;
 
-import com.mehmandarov.jhg.domain.ConfEvent;
-import com.mehmandarov.jhg.events.EventStore;
-import com.mehmandarov.jhg.events.EventVisibility;
 import com.mehmandarov.jhg.interceptors.Timed;
 import com.mehmandarov.jhg.interceptors.Traced;
-import jakarta.enterprise.concurrent.Asynchronous;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.GET;
@@ -47,10 +43,7 @@ public class EventStreamResource {
     EventBroadcaster broadcaster;
 
     @Inject
-    EventStore store;
-
-    @Inject
-    EventVisibility visibility;
+    SnapshotSender snapshotSender;
 
     @GET
     @Produces(MediaType.SERVER_SENT_EVENTS)
@@ -60,35 +53,7 @@ public class EventStreamResource {
         broadcaster.register(sink, sse);
 
         Principal principal = security == null ? null : security.getUserPrincipal();
-        sendSnapshotAsync(sse, sink, principal);
-    }
-
-    /**
-     * Fire the initial snapshot off the request thread — keeps the response
-     * latency low and lets the broadcaster start delivering live events
-     * immediately. Container-managed asynchrony, no {@link java.util.concurrent.ExecutorService}
-     * to manage.
-     */
-    @Asynchronous
-    public void sendSnapshotAsync(Sse sse, SseEventSink sink, Principal principal) {
-        try {
-            for (ConfEvent c : store.all()) {
-                if (!visibility.canSee(principal, c)) continue;
-                sink.send(sse.newEventBuilder()
-                        .id(c.id())
-                        .name("snapshot")
-                        .mediaType(MediaType.APPLICATION_JSON_TYPE)
-                        .data(ConfEvent.class, c)
-                        .build());
-            }
-            sink.send(sse.newEventBuilder()
-                    .name("snapshot-end")
-                    .data(String.class, "ready")
-                    .build());
-        } catch (RuntimeException ignored) {
-            // Sink already closed (client navigated away). The broadcaster's
-            // onError handler will clean up.
-        }
+        snapshotSender.send(sse, sink, principal);
     }
 }
 
