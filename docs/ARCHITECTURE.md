@@ -178,23 +178,21 @@ flowchart LR
 
 ## 4. Portability matrix
 
-Same WAR runs on any compliant runtime. Spec level, Liberty feature, and status:
+The same application library runs on all three runtimes. Spec level, how each runtime provides it, and status:
 
-| Gem | Spec (level) | Liberty feature | Portability |
-|-----|--------------|-----------------|-------------|
-| ① Observability | Interceptors 2.2 (CDI) | `cdi-4.1` | ✅ |
-| ② Authorization | Security 4.0 / REST 4.0 | `appSecurity-6.0`, `restfulWS-4.0` | ✅ |
-| ③ Policy & rules | EL 6.0 (Expressly in WAR) | bundled | ✅ |
-| ④ Reactive (SSE) | REST 4.0 | `restfulWS-4.0` | ✅ |
-| ④ Reactive (async) | Concurrency 3.1 | `concurrent-3.1` | ⚠️ see caveat |
-| ⑤ AI streaming | JSON-P 2.1 | `jsonp-2.1` | ✅ |
-| ★ Auth token | MP JWT 2.1 (MP 7.1) | `microProfile-7.1` | ✅ |
+| Gem | Spec (level) | Liberty feature | Helidon MP / Quarkus | Portability |
+|-----|--------------|-----------------|----------------------|-------------|
+| ① Observability | Interceptors 2.2 (CDI) | `cdi-4.1` | CDI core (Weld / Arc) | ✅ |
+| ② Authorization | Security 4.0 / REST 4.0 | `appSecurity-6.0`, `restfulWS-4.0` | MP JWT + JAX-RS core | ✅ |
+| ③ Policy & rules | EL 6.0 (Expressly bundled in jar) | bundled | bundled | ✅ |
+| ④ Reactive (SSE) | REST 4.0 | `restfulWS-4.0` | JAX-RS core (Jersey / RESTEasy Reactive) | ✅ |
+| ④ Reactive (async) | Concurrency 3.1 | `concurrent-3.1` | Concurrency impl on classpath | ✅ |
+| ⑤ AI streaming | JSON-P 2.1 | `jsonp-2.1` | JSON-P core (Parsson) | ✅ |
+| ★ Auth token | MP JWT 2.1 (MP 7.1) | `microProfile-7.1` | MP JWT impl (SmallRye) | ✅ |
 
-**`@Asynchronous` caveat:** it's Jakarta Concurrency 3.1
+**`@Asynchronous` note:** this is Jakarta Concurrency 3.1
 (`jakarta.enterprise.concurrent.Asynchronous`, Web Profile — not
-`jakarta.ejb.Asynchronous`). The annotation only fires through the CDI proxy,
-but `EventStreamResource.subscribe → this.sendSnapshotAsync` and
-`AnalyzeResource.analyze → this.runAsync` are self-invocations that bypass it,
-so the work runs inline on the request thread today. Functionally correct;
-moving the worker to a separate injected bean is a tracked follow-up.
+`jakarta.ejb.Asynchronous`). The annotation fires through the CDI proxy;
+`SnapshotSender` and `AnalysisRunner` are separate injected beans precisely
+so the call goes through the proxy rather than short-circuiting via `this`.
 
