@@ -6,7 +6,7 @@
  *
  * <p>Headlines:
  * <ul>
- *   <li>{@link com.mehmandarov.jhg.authz.PredicateEvaluator} — 5-operator,
+ *   <li>{@link com.mehmandarov.jhg.authz.PredicateEvaluator} — 4-operator,
  *       no-nesting predicate DSL (gem #3 replaces it with sandboxed Jakarta EL).</li>
  *   <li>{@link com.mehmandarov.jhg.authz.AccessPolicy} — plain CDI bean holding
  *       a hot-reloadable rule set; decisions via {@code @RolesAllowed} + a JAX-RS

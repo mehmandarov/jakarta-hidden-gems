@@ -1,5 +1,5 @@
 {
-  "_comment": "Default JACC policy for ConfSpeakerHub. Hot-reloaded from disk at runtime — point JHG_POLICY_FILE at a writable copy of this file and edit it during the demo to watch the row set change with no redeploy. Predicate language: 5 ops (intersects, contains, ==, !=, &&) over speaker.* and event.* paths.",
+  "_comment": "Default JACC policy for ConfSpeakerHub. Hot-reloaded from disk at runtime — point JHG_POLICY_FILE at a writable copy of this file and edit it during the demo to watch the row set change with no redeploy. Predicate language: 4 operators (intersects, contains, ==, !=) plus the && AND-join, over speaker.* and event.* paths.",
   "rules": [
     {
       "subject":   "role:SPEAKER",
