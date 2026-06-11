@@ -13,9 +13,9 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * Tiny, deliberately limited predicate language for ABAC rules. <strong>5
+ * Tiny, deliberately limited predicate language for ABAC rules. <strong>4
  * operators, no nesting, no functions</strong> — exactly what gem #2 needs
- * and no more. Bonus EL post replaces it with a sandboxed {@code ELProcessor}.
+ * and no more. The EL post replaces it with a sandboxed {@code ELProcessor}.
  *
  * <p><b>Grammar:</b>
  * <pre>
