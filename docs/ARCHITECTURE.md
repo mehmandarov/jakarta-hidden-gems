@@ -33,7 +33,7 @@ flowchart TB
             direction LR
             TRACE["TracingInterceptor / TimingInterceptor<br/>@Traced @Timed  ①"]
             AUTHN["MP-JWT validation<br/>@LoginConfig(MP-JWT)  ★"]
-            ABAC["AbacRequestFilter + @RolesAllowed  ②<br/>↓ delegates predicate eval<br/>ELPolicyEvaluator → SafeELEvaluator  ③"]
+            ABAC["AbacRequestFilter + @RolesAllowed  ②<br/>↓ delegates predicate eval<br/>ElPredicateEngine (sandboxed EL; SafeELEvaluator = hardened variant)  ③"]
         end
 
         subgraph resources["JAX-RS resources"]
