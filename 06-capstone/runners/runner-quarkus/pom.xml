@@ -22,7 +22,7 @@
     </description>
 
     <properties>
-        <quarkus.platform.version>3.36.1</quarkus.platform.version>
+        <quarkus.platform.version>3.37.2</quarkus.platform.version>
         <quarkus.package.jar.type>uber-jar</quarkus.package.jar.type>
     </properties>
 
