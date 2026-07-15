@@ -23,7 +23,7 @@
 
     <properties>
         <microprofile.reactive.messaging.version>3.0.1</microprofile.reactive.messaging.version>
-        <kafka.clients.version>4.3.0</kafka.clients.version>
+        <kafka.clients.version>4.3.1</kafka.clients.version>
     </properties>
 
     <dependencies>
