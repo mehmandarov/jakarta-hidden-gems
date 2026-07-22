@@ -63,7 +63,7 @@
         <maven.surefire.plugin.version>3.5.6</maven.surefire.plugin.version>
         <maven.failsafe.plugin.version>3.5.6</maven.failsafe.plugin.version>
         <maven.war.plugin.version>3.5.1</maven.war.plugin.version>
-        <liberty.maven.plugin.version>3.12.0</liberty.maven.plugin.version>
+        <liberty.maven.plugin.version>3.12.1</liberty.maven.plugin.version>
     </properties>
 
     <dependencyManagement>
