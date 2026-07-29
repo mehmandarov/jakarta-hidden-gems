@@ -25,7 +25,7 @@
     <properties>
         <helidon.version>4.5.1</helidon.version>
         <maven.dependency.plugin.version>3.11.0</maven.dependency.plugin.version>
-        <maven.jar.plugin.version>3.5.0</maven.jar.plugin.version>
+        <maven.jar.plugin.version>3.5.1</maven.jar.plugin.version>
     </properties>
 
     <dependencyManagement>
